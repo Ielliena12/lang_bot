@@ -2,6 +2,7 @@ package storage
 
 import (
 	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"io"
 )
@@ -18,9 +19,9 @@ type Message struct {
 func (message *Message) Hash() (string, error) {
 	h := sha1.New()
 
-	if _, err = io.WriteString(h, message.MessageItem); err != nil {
+	if _, err := io.WriteString(h, message.MessageItem); err != nil {
 		return "", fmt.Errorf("word was not hashed: %w", err)
 	}
 
-	return fmt.Sprintln(h.Sum(nil)), nil
+	return hex.EncodeToString(h.Sum(nil)), nil
 }

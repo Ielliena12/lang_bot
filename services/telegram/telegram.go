@@ -3,11 +3,13 @@ package telegram
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ielliena/lang_bot/storage"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
 	"strconv"
+	"strings"
 )
 
 type Client struct {
@@ -42,10 +44,14 @@ func (client *Client) GetUpdates(offset int, limit int) ([]Updates, error) {
 	return resp.Result, nil
 }
 
-func (client *Client) SendMessage(chatID int, message string) error {
+func (client *Client) SendMessage(chatID int, message *storage.Message) error {
+	msg := strings.ReplaceAll(message.MessageItem, "\\*", "<tg-spoiler>")
+	msg = strings.ReplaceAll(msg, "*\\", "</tg-spoiler>")
+
 	query := url.Values{}
-	query.Add("chatID", strconv.Itoa(chatID))
-	query.Add("message", message)
+	query.Add("chat_id", strconv.Itoa(chatID))
+	query.Add("text", msg)
+	query.Add("parse_mode", "HTML")
 
 	_, err := client.sendRequest("sendMessage", query)
 	if err != nil {

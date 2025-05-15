@@ -1,10 +1,10 @@
-package telegram
+package processor
 
 import (
 	"fmt"
-	"mod/events"
-	"mod/services/telegram"
-	"mod/storage"
+	"github.com/ielliena/lang_bot/events"
+	"github.com/ielliena/lang_bot/services/telegram"
+	"github.com/ielliena/lang_bot/storage"
 )
 
 type Processor struct {

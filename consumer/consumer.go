@@ -1,7 +1,7 @@
 package consumer
 
 import (
-	"mod/events"
+	"github.com/ielliena/lang_bot/events"
 	"time"
 )
 

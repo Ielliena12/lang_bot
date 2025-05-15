@@ -1,9 +1,9 @@
-package telegram
+package processor
 
 import (
 	"fmt"
+	"github.com/ielliena/lang_bot/storage"
 	"log"
-	"mod/storage"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +11,6 @@ import (
 
 const (
 	StartCmd = "/start"
-	AddCmd   = "/add"
 	HideCmd  = "/hide"
 	GetCmd   = "/get"
 )
@@ -25,13 +24,15 @@ func (processor *Processor) checkCommand(text string, chatID int) error {
 
 	switch text {
 	case StartCmd:
-		return processor.tg.SendMessage(chatID, "Добрый день")
-	case AddCmd:
-		return processor.saveWord(text)
+		return processor.tg.SendMessage(chatID, &storage.Message{MessageItem: "Добрый день"})
 	case GetCmd:
 		return processor.getWord(chatID)
 	default:
-		return processor.tg.SendMessage(chatID, "Неизвестная команда")
+		if err := processor.saveWord(text); err != nil {
+			fmt.Println(err)
+			return err
+		}
+		return processor.tg.SendMessage(chatID, &storage.Message{MessageItem: "Слово сохранено в словарь"})
 	}
 }
 

@@ -3,9 +3,8 @@ package files
 import (
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
+	"github.com/ielliena/lang_bot/storage"
 	"math/rand"
-	"mod/storage"
 	"os"
 	"path/filepath"
 	"time"
@@ -20,40 +19,40 @@ func NewStorage(basePath string) Storage {
 }
 
 func (storage Storage) Save(message *storage.Message) (err error) {
-	defer func() { err = fmt.Errorf("word was not saved: %w", err) }()
-
-	filePath := filepath.Join(s.basePath, "eng")
+	filePath := filepath.Join(storage.basePath, "eng")
 	if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
-		return err
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
 	fileName, err := fileName(message)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate filename: %w", err)
 	}
+
 	filePath = filepath.Join(filePath, fileName)
 	file, err := os.Create(filePath)
-
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
 	defer file.Close()
 
-	if err := gob.NewEncoder(file).Encode(message); err != nil {
-		return err
+	// Проверяем, что MessageItem поддерживает gob-сериализацию
+	if err := gob.NewEncoder(file).Encode(message.MessageItem); err != nil {
+		return fmt.Errorf("failed to encode message: %w", err)
 	}
 
 	return nil
 }
 
 func (storage Storage) PickWord() (message *storage.Message, err error) {
-	defer func() { err = fmt.Errorf("word was not picked: %w", err) }()
-
-	filePath := filepath.Join(s.basePath, "eng")
+	filePath := filepath.Join(storage.basePath, "eng")
 
 	files, err := os.ReadDir(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("word was not picked: %w", err)
 	}
 	if len(files) == 0 {
-		return nil, nil
+		return nil, fmt.Errorf("word was not picked: %w", err)
 	}
 
 	rand.Seed(time.Now().UnixNano())
@@ -61,21 +60,24 @@ func (storage Storage) PickWord() (message *storage.Message, err error) {
 
 	file := files[n]
 
-	return storage.decodeMessage(filePath.Join(filePath, file.Name()))
+	return storage.decodeMessage(filepath.Join(filePath, file.Name()))
 }
 
-func (storage Storage) decodeMessage(filePath string) (*storage.Message, error) {
+func (s Storage) decodeMessage(filePath string) (*storage.Message, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("file was not opened: %w", err)
 	}
+	defer file.Close()
 
-	var message = storage.Message
-	if err := gob.NewEncoder(file).Decode(&message); err != nil {
+	var message string
+	if err := gob.NewDecoder(file).Decode(&message); err != nil {
 		return nil, fmt.Errorf("file was not decoded: %w", err)
 	}
 
-	return &message, nil
+	return &storage.Message{
+		MessageItem: message,
+	}, nil
 }
 
 func fileName(message *storage.Message) (string, error) {

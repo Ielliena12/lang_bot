@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/ielliena/lang_bot/consumer"
+	"github.com/ielliena/lang_bot/events/processor"
+	"github.com/ielliena/lang_bot/services/telegram"
+	"github.com/ielliena/lang_bot/storage/files"
 	"github.com/joho/godotenv"
 	"log"
-	"mod/services/telegram"
 	"os"
 )
 
@@ -17,13 +20,12 @@ func main() {
 	var tgToken string = mustToken()
 	var host string = mustHost()
 
-	tgClient = telegram.NewClient(host, tgToken)
-	eventsProcessor := telegram2.NewClient(host, tgToken, files.New('storage'))
-	//
-	//fetcher = fetcher.New()
-	//processor = processor.New()
-	//
-	//consumer.Start(fetcher, processor)
+	tgClient := telegram.NewClient(host, tgToken)
+	eventsProcessor := processor.NewProcessor(tgClient, files.NewStorage("storage"))
+
+	if err := consumer.New(eventsProcessor, eventsProcessor, 100).Start(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func mustToken() string {
