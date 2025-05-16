@@ -70,7 +70,7 @@ func (client *Client) sendRequest(method string, query url.Values) ([]byte, erro
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("request was not sended: %w", err)
+		return nil, fmt.Errorf("request was not created: %w", err)
 	}
 
 	req.URL.RawQuery = query.Encode()

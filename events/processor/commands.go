@@ -2,21 +2,19 @@ package processor
 
 import (
 	"fmt"
+	"github.com/ielliena/lang_bot/config"
 	"github.com/ielliena/lang_bot/storage"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 )
 
 const (
 	StartCmd = "/start"
-	HideCmd  = "/hide"
 	GetCmd   = "/get"
 )
 
 func (processor *Processor) checkCommand(text string, chatID int) error {
-	if strconv.Itoa(chatID) != mustOwner() {
+	if strconv.Itoa(chatID) != config.GetOwner() {
 		return nil
 	}
 
@@ -59,14 +57,4 @@ func (processor *Processor) getWord(chatID int) error {
 	}
 
 	return nil
-}
-
-func mustOwner() string {
-	owner, exists := os.LookupEnv("OWNER")
-
-	if !exists || owner == "" {
-		log.Fatal("Environment variable OWNER not set")
-	}
-
-	return owner
 }
