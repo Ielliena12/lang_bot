@@ -2,9 +2,11 @@ package processor
 
 import (
 	"fmt"
+	"github.com/ielliena/lang_bot/config"
 	"github.com/ielliena/lang_bot/events"
 	"github.com/ielliena/lang_bot/services/telegram"
 	"github.com/ielliena/lang_bot/storage"
+	"strconv"
 )
 
 type Processor struct {
@@ -48,6 +50,16 @@ func (processor *Processor) Process(event events.Event) error {
 	default:
 		return fmt.Errorf("empty message: %w", '-')
 	}
+}
+
+func (processor *Processor) RemindWord() error {
+	chatId, _ := strconv.Atoi(config.GetOwner())
+	event := events.Event{
+		Type:   events.Message,
+		Text:   "/get",
+		ChatID: chatId,
+	}
+	return processor.processMessage(event)
 }
 
 func (processor *Processor) processMessage(event events.Event) error {

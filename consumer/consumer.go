@@ -1,6 +1,7 @@
 package consumer
 
 import (
+	"fmt"
 	"github.com/ielliena/lang_bot/events"
 	"time"
 )
@@ -37,4 +38,15 @@ func (consumer Consumer) Start() error {
 			}
 		}
 	}
+}
+
+func (consumer Consumer) RemindWord() error {
+	ticker := time.NewTicker(15 * time.Minute)
+	for _ = range ticker.C {
+		if err := consumer.processor.RemindWord(); err != nil {
+			return fmt.Errorf("message was not processed: %w", '-')
+		}
+	}
+
+	return nil
 }

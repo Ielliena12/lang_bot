@@ -6,6 +6,7 @@ type Fetcher interface {
 
 type Processor interface {
 	Process(event Event) error
+	RemindWord() error
 }
 
 type Type int

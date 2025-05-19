@@ -23,7 +23,15 @@ func main() {
 	tgClient := telegram.NewClient(host, tgToken)
 
 	eventsProcessor := processor.NewProcessor(tgClient, files.NewStorage("storage"))
-	if err := consumer.New(eventsProcessor, eventsProcessor, 100).Start(); err != nil {
+	consumerItem := consumer.New(eventsProcessor, eventsProcessor, 100)
+	go func() {
+		err := consumerItem.RemindWord()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	if err := consumerItem.Start(); err != nil {
 		log.Fatal(err)
 	}
 }
